@@ -1,0 +1,33 @@
+pipeline {
+    agent any
+    tools {
+        maven "mymaven"
+    }
+
+    stages {
+        stage('code') {
+            steps {
+                git 'https://github.com/narshinanikhil/dockerwebapp.git'
+            }
+        }
+        stage('Build') {
+            steps {
+                sh 'mvn clean install'
+            }
+        }
+        stage('CQA') {
+            steps {
+                withSonarQubeEnv('mysonar') { 
+                    sh '''
+                       mvn clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+                       -Dsonar.projectKey=New-project \
+                       -Dsonar.projectName='New project' \
+                       -Dsonar.host.url=http://184.73.149.42:9000 \
+                       -Dsonar.token=sqp_6c8dd10f6127c65a92dd38fe87dca64e23deccae
+                    '''
+                    
+                }
+            }
+        }
+    }
+}
